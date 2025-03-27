@@ -10,7 +10,7 @@ using PdArchEcsCorePersistence;
 using PdArchEcsCorePersistenceGenerator.Utils;
 
 [Generator]
-public class EntityStateGenerator : IIncrementalGenerator
+public class EntityGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
@@ -34,12 +34,17 @@ public class EntityStateGenerator : IIncrementalGenerator
             var entityName = entityStateInterfaceSymbol.Name[1..].Replace("State", "");
             var namespaces = new HashSet<string> { };
             var entityStateClassCode = EntityStateTemplate.Generate(ctx, semanticModel, ns => namespaces.Add(ns));
+            var entityPropertyAccessClassCode = EntityPropertyAccessTemplate.Generate(ctx, semanticModel, ns => namespaces.Add(ns));
 
             var code = $$"""
 namespace {{entityStateInterfaceSymbol.ContainingNamespace.ToDisplayString()}};
+
 using PdArchEcsCorePersistence;
 using ByteFormatter;
+using VContainer;
+
 {{entityStateClassCode}}
+{{entityPropertyAccessClassCode}}
 
 """;
 
