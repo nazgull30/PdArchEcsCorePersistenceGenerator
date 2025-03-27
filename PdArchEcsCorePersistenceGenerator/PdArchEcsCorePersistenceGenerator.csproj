@@ -9,6 +9,7 @@
         <CopyAllFiles>true</CopyAllFiles>
         <RootNamespace>PdArchEcsCorePersistenceGenerator</RootNamespace>
         <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+        <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
         <OutputPath>./nupkg</OutputPath>
 
         <Title>PdArchEcsCorePersistenceGenerator</Title>
@@ -37,7 +38,18 @@
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4"
+            PrivateAssets="all">
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.10.0"
+            PrivateAssets="all" />
+    </ItemGroup>
+
+    <ItemGroup>
         <!-- Dependencies go here. -->
+        <PackageReference Include="PdArchEcsCore" Version="1.0.2" />
         <PackageReference Include="IsExternalInit" Version="1.0.3">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -47,5 +59,10 @@
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
         <PackageReference Include="GodotSharp" Version="4.3.0" />
+    </ItemGroup>
+    <ItemGroup>
+    </ItemGroup>
+    <ItemGroup>
+        <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
     </ItemGroup>
 </Project>
