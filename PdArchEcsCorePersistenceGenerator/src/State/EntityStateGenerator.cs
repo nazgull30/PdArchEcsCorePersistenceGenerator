@@ -39,6 +39,7 @@ public class EntityGenerator : IIncrementalGenerator
             var code = $$"""
 namespace {{entityStateInterfaceSymbol.ContainingNamespace.ToDisplayString()}};
 
+using PdArchEcsCore.Components.Persistence;
 using PdArchEcsCorePersistence;
 using ByteFormatter;
 using VContainer;
