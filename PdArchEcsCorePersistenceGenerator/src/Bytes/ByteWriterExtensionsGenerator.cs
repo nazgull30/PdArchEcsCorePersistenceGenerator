@@ -11,7 +11,7 @@ using PdArchEcsCore.Entities;
 using PdArchEcsCorePersistenceGenerator.Utils;
 
 [Generator]
-public class ByteReaderExtensionsGenerator : IIncrementalGenerator
+public class ByteWriterExtensionsGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
@@ -43,7 +43,7 @@ public class ByteReaderExtensionsGenerator : IIncrementalGenerator
                 if (methodsDict.ContainsKey(property.FieldType))
                     continue;
 
-                var propertyMethods = ByteReaderPropertyMethodsTemplate.Generate(property);
+                var propertyMethods = ByteWriterPropertyMethodsTemplate.Generate(property);
                 methodsDict.Add(property.FieldType, propertyMethods);
                 namespaces.Add(property.Namespace);
             }
@@ -68,7 +68,7 @@ namespace PdArchEcsCorePersistence;
 using ByteFormatter;
 {{namespacesBuilder}}
 
-public static class ByteReaderExtensions
+public static class ByteWriterExtensions
 {
     {{methodsBuilder}}
 }
@@ -76,6 +76,6 @@ public static class ByteReaderExtensions
 """;
 
         var formattedCode = code.FormatCode();
-        context.AddSource($"EcsCodeGen.Persistence/ByteReaderExtensions.g.cs", formattedCode);
+        context.AddSource($"EcsCodeGen.Persistence/ByteWriterExtensions.g.cs", formattedCode);
     }
 }
