@@ -1,7 +1,6 @@
 namespace PdArchEcsCorePersistenceGenerator.Components;
 
 using System;
-using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using PdArchEcsCorePersistenceGenerator.Utils;
@@ -36,7 +35,7 @@ public static class ComponentPropertyAccessTemplate
             {
                 if (!entity.Has{{structSymbol.Name}}())
                     return;
-                property.{{structSymbol.Name}} = entity.{{structSymbol.Name}}().Value;
+                property.{{structSymbol.Name}} = entity.{{structSymbol.Name}}().{{property.FieldName}};
             }
 
             public void Reset(I{{structSymbol.Name}}Property property)
