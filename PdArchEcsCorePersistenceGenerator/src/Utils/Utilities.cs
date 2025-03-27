@@ -24,6 +24,24 @@ public static class Utilities
         return attributes.Any(attr => attr.AttributeClass?.Name == attributeName);
     }
 
+    public static IEnumerable<AttributeData> GetAttributes(string attributeName, ISymbol symbol)
+    {
+        return symbol.GetAttributes().Where(a => a.AttributeClass?.Name == attributeName);
+    }
+
+    public static object GetAttributeFieldValue(AttributeData attribute, string fieldName)
+    {
+        // Look for the field in NamedArguments
+        foreach (var namedArg in attribute.NamedArguments)
+        {
+            if (namedArg.Key == fieldName)
+            {
+                return namedArg.Value.Value; // Extract the field value
+            }
+        }
+        return null; // Field not found
+    }
+
     public static bool ImplementsInterface(string interfaceFullName, TypeDeclarationSyntax ctx, SemanticModel semanticModel)
     {
         var classSymbol = semanticModel.GetDeclaredSymbol(ctx) as INamedTypeSymbol;

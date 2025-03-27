@@ -36,7 +36,7 @@ public class ByteWriterExtensionsGenerator : IIncrementalGenerator
         {
             var structSymbol = semanticModel.GetDeclaredSymbol(ctx) ?? throw new ArgumentException("structSymbol is null");
 
-            var properties = PropertyUtils.GetProperties(ctx, semanticModel);
+            var properties = PropertyUtils.GetPropertiesEnumOrUid(ctx, semanticModel);
 
             foreach (var property in properties)
             {
