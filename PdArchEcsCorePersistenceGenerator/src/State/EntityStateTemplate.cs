@@ -8,7 +8,12 @@ using PdArchEcsCorePersistenceGenerator.Utils;
 
 public static class EntityStateTemplate
 {
-    public static string Generate(InterfaceDeclarationSyntax stx, SemanticModel semanticModel, Action<string> addNs)
+
+    public static string Generate(
+        InterfaceDeclarationSyntax stx,
+        SemanticModel semanticModel,
+        Func<string, PropertyInfo> getComponentProperty,
+        Action<string> addNs)
     {
         var stateInterfaceSymbol = semanticModel.GetDeclaredSymbol(stx) as INamedTypeSymbol ?? throw new ArgumentException("interface is null");
         if (stateInterfaceSymbol == null)
@@ -20,13 +25,12 @@ public static class EntityStateTemplate
         var readSb = new StringBuilder();
         foreach (var propertyInterface in stateInterfaceSymbol.AllInterfaces)
         {
-            var properties = Utilities.GetAllProperties(propertyInterface);
-            if (properties.Count == 0)
-                continue;
-            var property = properties[0];
-            statePropertiesSb.Append("public ").Append($"{property.Type.ToDisplayString()}").Append($" {property.Name} ").Append("  { get; set; }\n");
-            writeSb.AppendLine($"writer.Write({property.Name});");
-            var readStatement = CreateRead(property);
+            var componentName = propertyInterface.Name[1..].Replace("Property", "");
+            var property = getComponentProperty(componentName);
+
+            statePropertiesSb.Append("public ").Append($"{property.FieldType}?").Append($" {componentName} ").Append("  { get; set; }\n");
+            writeSb.AppendLine($"writer.Write({componentName});");
+            var readStatement = CreateRead(property, componentName);
             readSb.AppendLine(readStatement);
         }
 
@@ -55,18 +59,18 @@ public static class EntityStateTemplate
     }
 
 
-    private static string CreateRead(IPropertySymbol propertySymbol)
+    private static string CreateRead(PropertyInfo propertyInfo, string componentName)
     {
 
-        if (propertySymbol.Type.ToDisplayString().Contains("Uid?"))
+        if (propertyInfo.FieldType.Contains("Uid"))
         {
-            return $"{propertySymbol.Name} = reader.ReadNullableUid();";
+            return $"{componentName} = reader.ReadNullableUid();";
         }
 
-        var typeName = propertySymbol.GetTypeName();
         var code = $$"""
-            {{propertySymbol.Name}} = reader.Read{{typeName}}Nullable();
+            {{componentName}} = reader.Read{{propertyInfo.FieldType}}Nullable();
 """;
         return code;
     }
+
 }

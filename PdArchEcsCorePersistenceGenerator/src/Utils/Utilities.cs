@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 public static class Utilities
 {
-    public static bool HasAttribute(string attributeName, TypeDeclarationSyntax declaration, SemanticModel semanticModel)
+    public static bool HasAttribute(string attributeName, SyntaxNode declaration, SemanticModel semanticModel)
     {
         var symbol = semanticModel.GetDeclaredSymbol(declaration);
         if (symbol == null)

@@ -8,17 +8,18 @@ using PdArchEcsCorePersistenceGenerator.Utils;
 
 public static class ComponentPropertyTemplate
 {
-    public static (string, string) Generate(StructDeclarationSyntax ctx, SemanticModel semanticModel)
+    public static string Generate(StructDeclarationSyntax ctx, SemanticModel semanticModel, Action<string> addNs)
     {
         var structSymbol = semanticModel.GetDeclaredSymbol(ctx) ?? throw new ArgumentException("structSymbol is null");
 
         var properties = PropertyUtils.GetPropertiesEnumOrUid(ctx, semanticModel);
         if (properties.Count != 1)
-            return (null, null);
+            return null;
 
         var property = properties[0];
+        addNs(property.Namespace);
         var statementSb = new StringBuilder();
-        statementSb.Append("public ").Append($"{property.FieldType}").Append($" {property.FieldName} ").Append("  { get; set; }");
+        statementSb.Append("public ").Append($"{property.FieldType}?").Append($" {structSymbol.Name} ").Append("  { get; set; }");
 
         var code = $$"""
 
@@ -27,6 +28,6 @@ public static class ComponentPropertyTemplate
             {{statementSb}}
         }
 """;
-        return (code, property.Namespace);
+        return code;
     }
 }

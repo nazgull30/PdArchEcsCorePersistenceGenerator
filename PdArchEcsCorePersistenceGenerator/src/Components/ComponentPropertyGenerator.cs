@@ -32,19 +32,33 @@ public class ComponentPropertyGenerator : IIncrementalGenerator
     {
         foreach (var (ctx, semanticModel) in structs)
         {
+            var namespaces = new HashSet<string> { };
             var structSymbol = semanticModel.GetDeclaredSymbol(ctx) ?? throw new ArgumentException("structSymbol is null");
-            var (propertyInterface, ns) = ComponentPropertyTemplate.Generate(ctx, semanticModel);
+            var propertyInterface = ComponentPropertyTemplate.Generate(ctx, semanticModel, ns => namespaces.Add(ns));
             if (string.IsNullOrEmpty(propertyInterface))
                 continue;
 
+            var propertyAccessClass = ComponentPropertyAccessTemplate.Generate(ctx, semanticModel, ns => namespaces.Add(ns));
+            if (string.IsNullOrEmpty(propertyAccessClass))
+                continue;
+
+            var namespacesBuilder = new StringBuilder();
+            foreach (var ns in namespaces)
+            {
+                namespacesBuilder.AppendLine($"using {ns};");
+            }
 
             var code = $$"""
 namespace PdArchEcsCore.Components.Persistence;
 
+using Arch.Core;
+using Arch.Core.Extensions;
 using PdArchEcsCorePersistence;
-using {{ns}};
+{{namespacesBuilder}}
 
 {{propertyInterface}}
+
+{{propertyAccessClass}}
 
 """;
             var formattedCode = code.FormatCode();

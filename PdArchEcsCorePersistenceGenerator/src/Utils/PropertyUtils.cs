@@ -23,6 +23,11 @@ public class PropertyUtils
                 if (fieldTypeSymbol.TypeKind != TypeKind.Enum && fieldType != "Uid")
                     continue;
 
+                if (fieldTypeSymbol.NullableAnnotation == NullableAnnotation.Annotated)
+                {
+                    fieldType += "?";
+                }
+
                 properties.Add(new PropertyInfo(fieldName, fieldType, fieldTypeSymbol.ContainingNamespace.ToDisplayString()));
 
             }
