@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using PdArchEcsCore.Entities;
@@ -40,42 +41,45 @@ public class EntityGenerator : IIncrementalGenerator
     (ImmutableArray<(StructDeclarationSyntax structDeclaration, SemanticModel SemanticModel)> structs,
     ImmutableArray<(InterfaceDeclarationSyntax interfaceDeclaration, SemanticModel SemanticModel)> interfaces) tuple)
     {
-        var componentProperties = new Dictionary<string, PropertyInfo>();
+        var components = new List<INamedTypeSymbol>();
         foreach (var (componentDeclaration, semanticModel) in tuple.structs)
         {
             var properties = PropertyUtils.GetProperties(componentDeclaration, semanticModel);
-            var componentSymbol = semanticModel.GetDeclaredSymbol(componentDeclaration) ?? throw new ArgumentException("structSymbol is null");
-
             if (properties.Count != 1)
                 continue;
-            componentProperties.Add(componentSymbol.Name, properties[0]);
-            // context.AddSource($"EcsCodeGen.Test.Components/{componentSymbol.Name}Persistence.g.cs", $"{fieldSymbols[0].Name} | {fieldSymbols[0].ConstantValue}");
+            var componentSymbol = semanticModel.GetDeclaredSymbol(componentDeclaration) ?? throw new ArgumentException("structSymbol is null");
+            components.Add(componentSymbol as INamedTypeSymbol);
         }
-
-
-        PropertyInfo getPropertyInfo(string componentName) => componentProperties[componentName];
 
         foreach (var (stateDeclaration, semanticModel) in tuple.interfaces)
         {
             var entityStateInterfaceSymbol = semanticModel.GetDeclaredSymbol(stateDeclaration) ?? throw new ArgumentException("stateSymbol is null");
             var entityName = entityStateInterfaceSymbol.Name[1..].Replace("State", "");
             var namespaces = new HashSet<string> { };
-            var entityStateClassCode = EntityStateTemplate.Generate(stateDeclaration, semanticModel, getPropertyInfo, ns => namespaces.Add(ns));
-            var entityPropertyAccessClassCode = EntityPropertyAccessTemplate.Generate(stateDeclaration, semanticModel, getPropertyInfo, ns => namespaces.Add(ns));
 
+            var entityStateClassCode = EntityStateTemplate.Generate(stateDeclaration, semanticModel, components, ns => namespaces.Add(ns));
+            var entityPropertyAccessClassCode = EntityPropertyAccessTemplate.Generate(stateDeclaration, semanticModel, components, ns => namespaces.Add(ns));
+
+
+            var namespacesBuilder = new StringBuilder();
+            foreach (var ns in namespaces)
+            {
+                namespacesBuilder.AppendLine($"using {ns};");
+            }
 
             var code = $$"""
-        namespace {{entityStateInterfaceSymbol.ContainingNamespace.ToDisplayString()}};
+                namespace {{entityStateInterfaceSymbol.ContainingNamespace.ToDisplayString()}};
 
-        using PdArchEcsCore.Components.Persistence;
-        using PdArchEcsCorePersistence;
-        using ByteFormatter;
-        using VContainer;
+                {{namespacesBuilder}}
+                using PdArchEcsCore.Components.Persistence;
+                using PdArchEcsCorePersistence;
+                using ByteFormatter;
+                using VContainer;
 
-        {{entityStateClassCode}}
-        {{entityPropertyAccessClassCode}}
+                {{entityStateClassCode}}
+                {{entityPropertyAccessClassCode}}
 
-        """;
+            """;
 
             var formattedCode = code.FormatCode();
             context.AddSource($"EcsCodeGen.Persistence.States/{entityName}Persistence.g.cs", formattedCode);

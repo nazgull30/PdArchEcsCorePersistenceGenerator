@@ -1,6 +1,8 @@
 namespace PdArchEcsCorePersistenceGenerator.State;
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -12,7 +14,7 @@ public static class EntityStateTemplate
     public static string Generate(
         InterfaceDeclarationSyntax stx,
         SemanticModel semanticModel,
-        Func<string, PropertyInfo> getComponentProperty,
+        List<INamedTypeSymbol> components,
         Action<string> addNs)
     {
         var stateInterfaceSymbol = semanticModel.GetDeclaredSymbol(stx) as INamedTypeSymbol ?? throw new ArgumentException("interface is null");
@@ -26,11 +28,17 @@ public static class EntityStateTemplate
         foreach (var propertyInterface in stateInterfaceSymbol.AllInterfaces)
         {
             var componentName = propertyInterface.Name[1..].Replace("Property", "");
-            var property = getComponentProperty(componentName);
+            var componentSymbol = components.Find(c => c.Name == componentName);
+            if (componentSymbol == null)
+                continue;
 
-            statePropertiesSb.Append("public ").Append($"{property.FieldType}?").Append($" {componentName} ").Append("  { get; set; }\n");
+            var field = componentSymbol.GetMembers().OfType<IFieldSymbol>().First();
+
+            addNs(field.Type.ContainingNamespace.ToDisplayString());
+            var typeName = field.Type.IsPrimitiveType() ? field.Type.ToDisplayString() : field.Type.Name;
+            statePropertiesSb.Append("public ").Append($"{typeName}?").Append($" {componentName} ").Append("  { get; set; }\n");
             writeSb.AppendLine($"writer.Write({componentName});");
-            var readStatement = CreateRead(property, componentName);
+            var readStatement = CreateRead(field, componentName);
             readSb.AppendLine(readStatement);
         }
 
@@ -59,16 +67,21 @@ public static class EntityStateTemplate
     }
 
 
-    private static string CreateRead(PropertyInfo propertyInfo, string componentName)
+    private static string CreateRead(IFieldSymbol fieldSymbol, string componentName)
     {
 
-        if (propertyInfo.FieldType.Contains("Uid"))
+        if (fieldSymbol.Type.Name.Contains("Uid"))
         {
             return $"{componentName} = reader.ReadNullableUid();";
         }
 
+        var typeName = fieldSymbol.Type.Name;
+        if (fieldSymbol.Type.TypeKind == TypeKind.Enum)
+        {
+            typeName = fieldSymbol.Type.Name.RemoveE();
+        }
         var code = $$"""
-            {{componentName}} = reader.Read{{propertyInfo.FieldType}}Nullable();
+            {{componentName}} = reader.Read{{typeName}}Nullable();
 """;
         return code;
     }

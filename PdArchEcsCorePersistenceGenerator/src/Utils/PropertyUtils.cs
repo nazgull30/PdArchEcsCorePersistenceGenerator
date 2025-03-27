@@ -48,14 +48,18 @@ public class PropertyUtils
                 var fieldName = variable.Identifier.Text;
                 var fieldType = fieldTypeSymbol.ToDisplayString();
 
-                properties.Add(new PropertyInfo(fieldName, fieldType, fieldTypeSymbol.ContainingNamespace.ToDisplayString()));
+                var propertyInfo = new PropertyInfo(fieldName, fieldType, fieldTypeSymbol.ContainingNamespace.ToDisplayString())
+                {
+                    FieldTypeSymbol = fieldTypeSymbol
+                };
+                properties.Add(propertyInfo);
 
             }
         }
         return properties;
     }
 
-    public static PropertyInfo GetSingleProperties(StructDeclarationSyntax stx, SemanticModel semanticModel)
+    public static PropertyInfo GetSingleProperty(StructDeclarationSyntax stx, SemanticModel semanticModel)
     {
         var structSymbol = semanticModel.GetDeclaredSymbol(stx) ?? throw new ArgumentException("structSymbol is null");
         var fields = stx.Members.OfType<FieldDeclarationSyntax>();

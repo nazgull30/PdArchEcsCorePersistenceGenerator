@@ -1,17 +1,17 @@
 namespace PdArchEcsCorePersistenceGenerator.State;
 
 using System;
+using System.Collections.Generic;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using PdArchEcsCorePersistenceGenerator.Utils;
 
 public static class EntityPropertyAccessTemplate
 {
     public static string Generate(
         InterfaceDeclarationSyntax stx,
         SemanticModel semanticModel,
-        Func<string, PropertyInfo> getComponentProperty,
+        List<INamedTypeSymbol> components,
         Action<string> addNs)
     {
         var stateInterfaceSymbol = semanticModel.GetDeclaredSymbol(stx) as INamedTypeSymbol ?? throw new ArgumentException("interface is null");
@@ -22,7 +22,6 @@ public static class EntityPropertyAccessTemplate
         foreach (var propertyInterface in stateInterfaceSymbol.AllInterfaces)
         {
             var componentName = propertyInterface.Name[1..].Replace("Property", "");
-            var property = getComponentProperty(componentName);
 
             statePropertiesSb.AppendLine($"AddOriginator<{componentName}PropertyAccess>();");
         }

@@ -2,7 +2,6 @@ namespace PdArchEcsCorePersistenceGenerator.Utils;
 
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Reflection;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -49,6 +48,20 @@ public static class Extensions
         }
 
         return type.Type.ConvertToPrimitive();
+    }
+
+    public static string GetTypeName(this ITypeSymbol type)
+    {
+        if (type.NullableAnnotation == NullableAnnotation.Annotated)
+        {
+            var typeSymbol = type as INamedTypeSymbol;
+            var basicType = typeSymbol.TypeArguments[0];
+            if (basicType.TypeKind == TypeKind.Enum)
+                return basicType.Name.RemoveE();
+            return basicType.Name;
+        }
+
+        return type.ConvertToPrimitive();
     }
 
 

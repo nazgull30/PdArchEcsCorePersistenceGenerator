@@ -62,7 +62,7 @@ using PdArchEcsCorePersistence;
 
 """;
             var formattedCode = code.FormatCode();
-            context.AddSource($"EcsCodeGen.Persistence/{structSymbol}PersistenceProperties.g.cs", formattedCode);
+            context.AddSource($"EcsCodeGen.Persistence/{structSymbol.Name}PersistenceProperties.g.cs", formattedCode);
 
         }
     }

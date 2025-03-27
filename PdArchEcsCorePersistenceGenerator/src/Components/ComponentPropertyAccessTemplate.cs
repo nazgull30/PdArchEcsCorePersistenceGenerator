@@ -11,7 +11,7 @@ public static class ComponentPropertyAccessTemplate
     {
         var structSymbol = semanticModel.GetDeclaredSymbol(ctx) ?? throw new ArgumentException("structSymbol is null");
 
-        var properties = PropertyUtils.GetPropertiesEnumOrUid(ctx, semanticModel);
+        var properties = PropertyUtils.GetProperties(ctx, semanticModel);
         if (properties.Count != 1)
             return null;
 
