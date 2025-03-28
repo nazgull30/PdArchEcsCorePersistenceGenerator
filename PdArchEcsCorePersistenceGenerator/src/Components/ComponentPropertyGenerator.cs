@@ -49,11 +49,12 @@ public class ComponentPropertyGenerator : IIncrementalGenerator
             }
 
             var code = $$"""
-namespace PdArchEcsCore.Components.Persistence;
+namespace PdArchEcsCorePersistence.Components;
 
 using Arch.Core;
 using Arch.Core.Extensions;
 using PdArchEcsCorePersistence;
+using PdArchEcsCore.Components;
 {{namespacesBuilder}}
 
 {{propertyInterface}}
