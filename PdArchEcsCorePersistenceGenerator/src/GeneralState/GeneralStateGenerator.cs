@@ -65,6 +65,7 @@ public class GeneralStateGenerator : IIncrementalGenerator
 namespace PdArchEcsCorePersistence;
 
 using ByteFormatter;
+using System.Threading.Tasks;
 using System.Collections.Generic;
 using VContainer.Pools.Impls;
 using VContainer.Pools;
@@ -81,7 +82,20 @@ public interface IGeneralStateAccess : IAccess<GeneralState>
 
 {{generateStateAccessCode}}
 
+public interface IGeneralStateByteConverter
+{
+    GeneralState FromBytes(byte[] bytes);
+    byte[] ToBytes(GeneralState gameState);
+}
+
 {{generalStateByteConverterCode}}
+
+public interface IGeneralStateDao
+{
+    public Task Save(GeneralState generalState);
+    public GeneralState Load();
+}
+
 
 """;
         var formattedCode = code.FormatCode();

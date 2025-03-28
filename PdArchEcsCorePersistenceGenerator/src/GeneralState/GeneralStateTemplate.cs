@@ -26,7 +26,7 @@ public static class GeneralStateTemplate
 
         var code = $$"""
 
-        public class GeneralState : IGeneralState
+        public class GeneralState
         {
             {{fields}}
 

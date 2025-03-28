@@ -38,14 +38,14 @@ public class GeneralStateByteConverterTemplate
             {{pools}}
         ) : IGeneralStateByteConverter
         {
-            public byte[] ToBytes(IGeneralState gameState)
+            public byte[] ToBytes(GeneralState gameState)
             {
                 var writer = new ByteWriter(new byte[262144]);
                 gameState.ToByte(writer);
                 return writer.ToArray();
             }
 
-            public IGeneralState FromBytes(byte[] bytes)
+            public GeneralState FromBytes(byte[] bytes)
             {
                 var reader = new ByteReader(bytes);
                 var generalState = new GeneralState();
