@@ -32,7 +32,7 @@ public class ByteWriterPropertyMethodsTemplate
         var paramName = propertyInfo.FieldType.RemoveE().FirstCharToLower();
         var code = $$"""
                         public static void Write(this ByteWriter writer, {{propertyInfo.FieldType}} {{paramName}})
-                            => writer.Write((byte){{paramName}});
+                            => writer.Write((short){{paramName}});
                      """;
         return code;
     }
@@ -61,7 +61,7 @@ public class ByteWriterPropertyMethodsTemplate
                             if ({{paramName}}.HasValue)
                             {
                                 writer.Write(true);
-                                writer.Write((byte){{paramName}}.Value);
+                                writer.Write((short){{paramName}}.Value);
                             }
                             else
                                 writer.Write(false);
