@@ -1,4 +1,4 @@
-namespace PdArchEcsCorePersistenceGenerator.State;
+namespace PdArchEcsCorePersistenceGenerator.EntityState;
 
 using System;
 using System.Collections.Generic;
