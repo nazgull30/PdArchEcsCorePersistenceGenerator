@@ -8,7 +8,6 @@ using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using PdArchEcsCorePersistence;
-using PdArchEcsCorePersistenceGenerator.GeneralStatePool;
 using PdArchEcsCorePersistenceGenerator.Utils;
 
 [Generator]
@@ -54,6 +53,7 @@ public class GeneralStateGenerator : IIncrementalGenerator
         var generateStateCode = GeneralStateTemplate.Generate(entityStates, ns => namespaces.Add(ns));
         var generateStatePoolCode = GeneralStatePoolTemplate.Generate(entityStates, ns => namespaces.Add(ns));
         var generateStateAccessCode = GeneralStateAccessTemplate.Generate(entityStates, ns => namespaces.Add(ns));
+        var generalStateByteConverterCode = GeneralStateByteConverterTemplate.Generate(entityStates, ns => namespaces.Add(ns));
 
         var namespacesBuilder = new StringBuilder();
         foreach (var ns in namespaces)
@@ -67,6 +67,8 @@ namespace PdArchEcsCorePersistence;
 using ByteFormatter;
 using System.Collections.Generic;
 using VContainer.Pools.Impls;
+using VContainer.Pools;
+using VContainer;
 {{namespacesBuilder}}
 
 {{generateStateCode}}
@@ -78,6 +80,8 @@ public interface IGeneralStateAccess : IAccess<GeneralState>
 }
 
 {{generateStateAccessCode}}
+
+{{generalStateByteConverterCode}}
 
 """;
         var formattedCode = code.FormatCode();

@@ -1,4 +1,4 @@
-namespace PdArchEcsCorePersistenceGenerator.GeneralStatePool;
+namespace PdArchEcsCorePersistenceGenerator.GeneralState;
 
 using System;
 using System.Collections.Generic;

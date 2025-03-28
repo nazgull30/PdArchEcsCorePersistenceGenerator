@@ -1,4 +1,4 @@
-namespace PdArchEcsCorePersistenceGenerator.GeneralStatePool;
+namespace PdArchEcsCorePersistenceGenerator.GeneralState;
 
 using System;
 using System.Collections.Generic;
@@ -21,7 +21,7 @@ public static class GeneralStateAccessTemplate
             read.AppendLine(CreateRead(entityState, fieldName));
             write.AppendLine(CreateWrite(entityState, fieldName));
         }
-        if (access.Length > 0)
+        if (access.Length > 1)
         {
             access.Remove(access.Length - 2, 1);
         }
