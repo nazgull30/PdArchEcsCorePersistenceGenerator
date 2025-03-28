@@ -85,4 +85,37 @@ public static class Utilities
         return allProperties;
     }
 
+    public static bool InheritsFrom(ITypeSymbol typeSymbol, string baseClassName)
+    {
+        while (typeSymbol != null)
+        {
+            if (typeSymbol.Name == baseClassName)
+                return true; // ✅ Found the base class
+
+            typeSymbol = typeSymbol.BaseType; // Move up the inheritance chain
+        }
+
+        return false; // ❌ Not found
+    }
+
+    public static bool ImplementsIAccess(ITypeSymbol typeSymbol, string interfaceName)
+    {
+        while (typeSymbol != null)
+        {
+            // 🔹 Check all interfaces of the current class/base class
+            foreach (var interfaceSymbol in typeSymbol.AllInterfaces)
+            {
+                if (interfaceSymbol.OriginalDefinition.ToDisplayString() == interfaceName)
+                {
+                    return true;
+                }
+            }
+
+            // Move up the inheritance chain
+            typeSymbol = typeSymbol.BaseType;
+        }
+
+        return false;
+    }
+
 }
