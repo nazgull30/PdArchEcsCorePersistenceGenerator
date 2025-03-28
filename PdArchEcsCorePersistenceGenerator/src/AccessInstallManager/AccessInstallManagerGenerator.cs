@@ -12,78 +12,62 @@ using PdArchEcsCorePersistence;
 using PdArchEcsCorePersistenceGenerator.Utils;
 
 [Generator]
-public class AccessInstallerGenerator : IIncrementalGenerator
+public class AccessInstallManagerGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        var interfaceDeclarations = context.SyntaxProvider
-            .CreateSyntaxProvider(
-                predicate: (node, _) => node is InterfaceDeclarationSyntax,
-                transform: (context, _) => (context.Node as InterfaceDeclarationSyntax, context.SemanticModel)
-            )
-            .Where(pair => Utilities.HasAttribute(nameof(EntityStateAttribute), pair.Item1, pair.Item2))
-            .Collect();
+        var accessDeclarations = context.SyntaxProvider
+        .CreateSyntaxProvider(
+            predicate: (node, _) => node is ClassDeclarationSyntax,
+            transform: (context, _) => (context.Node as ClassDeclarationSyntax, context.SemanticModel.GetDeclaredSymbol(context.Node, cancellationToken: _) as ITypeSymbol, context.SemanticModel)
+        )
+        .Where(pair => Utilities.InheritsFrom(pair.Item2, "AMultipleEntityAccess") || Utilities.InheritsFrom(pair.Item2, "ASingleEntityAccess"))
+        .Collect();
 
-        context.RegisterSourceOutput(interfaceDeclarations, GenerateCode);
+        context.RegisterSourceOutput(accessDeclarations, GenerateCode);
     }
 
     private void GenerateCode(
         SourceProductionContext context,
-        ImmutableArray<(InterfaceDeclarationSyntax interfaceDeclaration, SemanticModel SemanticModel)> interfaces)
+        ImmutableArray<(ClassDeclarationSyntax classDeclaration, ITypeSymbol typeSymbol, SemanticModel SemanticModel)> interfaces)
     {
+        var accessSymbols = interfaces.Select(i => i.typeSymbol).ToList();
 
-        // foreach (var (stateDeclaration, semanticModel) in interfaces)
-        // {
-        //     var entityStateInterfaceSymbol = semanticModel.GetDeclaredSymbol(stateDeclaration) ?? throw new ArgumentException("stateSymbol is null");
-        //     var entityName = entityStateInterfaceSymbol.Name[1..].Replace("State", "");
-        //     var namespaces = new HashSet<string> { };
+        var namespaces = new HashSet<string> { };
 
-        //     var entityStateClassCode = EntityStateTemplate.Generate(stateDeclaration, semanticModel, components, ns => namespaces.Add(ns));
-        //     var entityPropertyAccessClassCode = EntityPropertyAccessTemplate.Generate(stateDeclaration, semanticModel, components, ns => namespaces.Add(ns));
+        var bindings = new StringBuilder();
 
+        foreach (var accessSymbol in accessSymbols)
+        {
+            bindings.AppendLine($"builder.Register<{accessSymbol.Name}>(Lifetime.Singleton).AsImplementedInterfaces();");
+            bindings.AppendLine($"builder.Register<{accessSymbol.Name.Replace("Access", "")}PropertyAccess>(Lifetime.Singleton).AsSelf().AsImplementedInterfaces();");
+            namespaces.Add(accessSymbol.ContainingNamespace.ToDisplayString());
+        }
 
-        //     var namespacesBuilder = new StringBuilder();
-        //     foreach (var ns in namespaces)
-        //     {
-        //         namespacesBuilder.AppendLine($"using {ns};");
-        //     }
-        // }
+        var namespacesBuilder = new StringBuilder();
+        foreach (var ns in namespaces)
+        {
+            namespacesBuilder.AppendLine($"using {ns};");
+        }
 
         var code = $$"""
 
-namespace Tavern.Src.Ecs.Persistence;
+namespace PdArchEcsCorePersistence;
 
-using PdArchEcsCorePersistence;
 using VContainer;
 using VContainer.Godot;
 using VContainer.Pools;
-using VContainer.Pools.Impls;
+{{namespacesBuilder}}
 
-public partial class AccessInstaller : MonoInstaller
+public static class AccessInstallManager
 {
-    public override void Install(IContainerBuilder builder)
+    public static void Install(IContainerBuilder builder)
     {
         builder.Register<GeneralStateAccess>(Lifetime.Singleton).AsImplementedInterfaces();
-
         builder.Register<GeneralStateByteConverter>(Lifetime.Singleton).AsImplementedInterfaces();
-
-        builder.Register<InventoryAccess>(Lifetime.Singleton).AsImplementedInterfaces();
-        builder.Register<InventoryPropertyAccess>(Lifetime.Singleton).AsSelf().AsImplementedInterfaces();
-
-        builder.Register<ContainerItemAccess>(Lifetime.Singleton).AsImplementedInterfaces();
-        builder.Register<ContainerItemPropertyAccess>(Lifetime.Singleton).AsSelf().AsImplementedInterfaces();
-
-        BindStatePool<InventoryState, IInventoryState>(builder);
-
         builder.RegisterPool<GeneralState, GeneralStatePool, IPool<GeneralState>>();
-        builder.RegisterPool<ContainerItemState, StatePool<ContainerItemState, IContainerItemState>, IPool<ContainerItemState>>();
-    }
 
-    protected void BindStatePool<TState, TAccess>(IContainerBuilder builder)
-        where TState : TAccess, new()
-         where TAccess : IProperty
-    {
-        builder.RegisterPool<TState, SimpleMemoryPool<TState>, IPool<TState>>();
+        {{bindings}}
     }
 }
 
@@ -91,7 +75,6 @@ public partial class AccessInstaller : MonoInstaller
 """;
 
         var formattedCode = code.FormatCode();
-        // context.AddSource($"EcsCodeGen.Persistence/AccessInstallManager.g.cs", formattedCode);
-
+        context.AddSource($"EcsCodeGen.Persistence/AccessInstallManager.g.cs", formattedCode);
     }
 }
