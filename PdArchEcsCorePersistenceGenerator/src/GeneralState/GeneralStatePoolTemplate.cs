@@ -19,7 +19,7 @@ public static class GeneralStatePoolTemplate
             if (entityState.Multiple)
             {
                 onCreated.AppendLine($"generalState.{fieldName} = [];");
-                onSpawned.AppendLine($"generalState.{fieldName}.Clear();");
+                onSpawned.AppendLine($"generalState.{fieldName}= [];");
             }
             else
             {

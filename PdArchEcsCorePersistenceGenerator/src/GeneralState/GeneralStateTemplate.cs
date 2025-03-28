@@ -48,7 +48,7 @@ public static class GeneralStateTemplate
     private static string CreateField(EntityStateInfo entityState, string fieldName)
     {
         var typeName = entityState.Symbol.Name[1..];
-        return entityState.Multiple ? $"public List<{typeName}> {fieldName};" : $"public {typeName} {fieldName};";
+        return entityState.Multiple ? $"public List<{typeName}> {fieldName} = [];" : $"public {typeName} {fieldName} = new();";
     }
 
     private static string CreateRead(EntityStateInfo entityState, string fieldName)
