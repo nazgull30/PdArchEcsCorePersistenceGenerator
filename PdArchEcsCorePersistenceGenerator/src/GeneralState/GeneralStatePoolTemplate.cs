@@ -9,8 +9,7 @@ public static class GeneralStatePoolTemplate
 {
     public static string Generate(List<EntityStateInfo> entityStates, Action<string> addNs)
     {
-        var onCreated = new StringBuilder();
-        var onSpawned = new StringBuilder();
+        var onDespawned = new StringBuilder();
 
         foreach (var entityState in entityStates)
         {
@@ -18,13 +17,12 @@ public static class GeneralStatePoolTemplate
             addNs(entityState.Symbol.ContainingNamespace.ToDisplayString());
             if (entityState.Multiple)
             {
-                onCreated.AppendLine($"generalState.{fieldName} = [];");
-                onSpawned.AppendLine($"generalState.{fieldName}= [];");
+                onDespawned.AppendLine($"generalState.{fieldName}.Clear();");
             }
             else
             {
                 var typeName = entityState.Symbol.Name[1..];
-                onSpawned.AppendLine($"generalState.{fieldName} = new {typeName}();");
+                onDespawned.AppendLine($"generalState.{fieldName} = new {typeName}();");
             }
         }
 
@@ -32,14 +30,9 @@ public static class GeneralStatePoolTemplate
 
         public class GeneralStatePool : SimpleMemoryPool<GeneralState>
         {
-            protected override void OnCreated(GeneralState generalState)
+            protected override void OnDespawned(GeneralState generalState)
             {
-                {{onCreated}}
-            }
-
-            protected override void OnSpawned(GeneralState generalState)
-            {
-                {{onSpawned}}
+                {{onDespawned}}
             }
         }
 

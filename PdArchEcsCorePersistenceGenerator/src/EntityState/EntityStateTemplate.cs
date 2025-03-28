@@ -47,7 +47,7 @@ public static class EntityStateTemplate
 
         var code = $$"""
 
-        public class {{className}} : {{stateInterfaceSymbol.Name}}, IByteConvertable
+        public struct {{className}} : {{stateInterfaceSymbol.Name}}, IByteConvertable
         {
             {{statePropertiesSb}}
 
