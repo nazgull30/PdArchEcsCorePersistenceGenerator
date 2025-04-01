@@ -21,7 +21,7 @@ public class EntityGenerator : IIncrementalGenerator
                    predicate: (node, _) => node is StructDeclarationSyntax,
                    transform: (context, _) => (context.Node as StructDeclarationSyntax, context.SemanticModel)
                )
-               .Where(pair => Utilities.HasAttribute(nameof(ComponentAttribute), pair.Item1, pair.Item2))
+               .Where(pair => Utilities.HasAttribute(nameof(ComponentAttribute), pair.Item1, pair.Item2) && Utilities.HasAttribute(nameof(PersistentAttribute), pair.Item1, pair.Item2))
                .Collect();
 
         var interfaceDeclarations = context.SyntaxProvider

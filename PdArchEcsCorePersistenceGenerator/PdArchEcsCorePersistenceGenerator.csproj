@@ -13,7 +13,7 @@
         <OutputPath>./nupkg</OutputPath>
 
         <Title>PdArchEcsCorePersistenceGenerator</Title>
-        <Version>1.0.1</Version>
+        <Version>1.0.2</Version>
         <Description>PdArchEcsCorePersistenceGenerator description.</Description>
         <Copyright>© 2025 nazgul30</Copyright>
         <Authors>nazgul30</Authors>
@@ -50,7 +50,7 @@
     <ItemGroup>
         <!-- Dependencies go here. -->
         <PackageReference Include="PdArchEcsCore" Version="1.0.2" />
-        <PackageReference Include="PdArchEcsCorePersistence" Version="1.0.2" />
+        <PackageReference Include="PdArchEcsCorePersistence" Version="1.0.4" />
         <PackageReference Include="IsExternalInit" Version="1.0.3">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
