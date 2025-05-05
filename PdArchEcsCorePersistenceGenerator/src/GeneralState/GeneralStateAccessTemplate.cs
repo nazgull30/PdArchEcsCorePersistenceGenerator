@@ -23,7 +23,8 @@ public static class GeneralStateAccessTemplate
         }
         if (access.Length > 1)
         {
-            access.Remove(access.Length - 2, 1);
+            access.Trim();
+            access.Remove(access.Length - 1, 1);
         }
 
         var code = $$"""

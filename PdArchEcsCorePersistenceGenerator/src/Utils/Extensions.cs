@@ -3,6 +3,7 @@ namespace PdArchEcsCorePersistenceGenerator.Utils;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
@@ -92,5 +93,20 @@ public static class Extensions
             {SpecialType.System_Object, "object"},
             {SpecialType.System_Void, "void"}
         };
+
+    public static void Trim(this StringBuilder sb)
+    {
+        // Trim start
+        while (sb.Length > 0 && char.IsWhiteSpace(sb[0]))
+        {
+            sb.Remove(0, 1);
+        }
+
+        // Trim end
+        while (sb.Length > 0 && char.IsWhiteSpace(sb[^1]))
+        {
+            sb.Remove(sb.Length - 1, 1);
+        }
+    }
 
 }
